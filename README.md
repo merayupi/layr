@@ -11,7 +11,7 @@ git clone https://github.com/merayupi/layr.git
 ```
 ### 2. go to the directory
 ```
-cd peer
+cd layr
 ```
 ### 3. Install all the module needed
 ```
