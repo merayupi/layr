@@ -151,7 +151,7 @@ async function getVerif(linkverif){
                 }
             }
         } catch (error) {
-            console.log(error)
+            //console.log(error)
         }
     }
     
