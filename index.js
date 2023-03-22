@@ -2,6 +2,7 @@ import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
 import {faker} from '@faker-js/faker';
 import readline from 'readline-sync';
+import {Wallet, ethers} from 'ethers'
 
 const randstr = length =>
     new Promise((resolve, reject) => {
@@ -56,9 +57,9 @@ const GetOtp = (email, domain) => new Promise((resolve, reject) => {
         .catch(err => console.log(err));
 });
 
-async function functionRegist(reff,email,name){
+async function functionRegist(reff,email,name,address){
     
-    const res = await fetch(`https://api.getwaitlist.com/api/v1/waiter`,{
+    const res = await fetch(`https://waitlistapi.golayr.com/addWaiter`,{
         method:"POST",
         headers:{
             "accept": "*/*",
@@ -77,11 +78,11 @@ async function functionRegist(reff,email,name){
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
         },
         body:JSON.stringify({
+            "username": name,
             "email": email,
-            "api_key": "HEK52Y",
-            "first_name": name,
-            "referral_link": reff
-          })
+            "referral_link": reff,
+            "ethAddress": address
+        })
     })
     return res.json()
 }
@@ -108,6 +109,16 @@ async function getVerif(linkverif){
     return res
 }
 
+function createAccountEth() {
+    const wallet = ethers.Wallet.createRandom();
+    const privateKey = wallet.privateKey;
+    const publicKey = wallet.publicKey;
+    return {
+        privateKey,
+        publicKey,
+    };
+}
+
 (async()=>{
     console.clear()
     console.log(`
@@ -130,10 +141,13 @@ async function getVerif(linkverif){
             const lastName = faker.name.lastName();
             const username = `${firstName.toLowerCase()}${lastName.toLowerCase()}${await randstr(5)}`;
             const email = `${username}${await randstr(5)}@${domain}`.toLowerCase();
+            const walletNew = createAccountEth();
+            const wallet = new Wallet(walletNew.privateKey);
+            const address = wallet.address
+            const regist = await functionRegist(linkreff,email,username,address)
 
-            const regist = await functionRegist(linkreff,email,username)
 
-            if(regist.verified == false){
+            if(regist.waiter.verified == false){
                 console.log('--> sukses regist')
                 console.log('--> menunggu verif reff...')
 
