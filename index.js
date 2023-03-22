@@ -151,17 +151,25 @@ function createAccountEth() {
                 console.log('--> sukses regist')
                 console.log('--> menunggu verif reff...')
 
-                let linkConfirm;
-                    do {
-                        linkConfirm = await GetOtp(email.split("@")[0], email.split("@")[1]);
-                        console.log(`---> Wait for veriff link..`)
+                let linkConfirm; 
+                const maxAttempts = 7; 
 
-                    } while (!linkConfirm);
-
-                const verif = await getVerif(linkConfirm)
-                if(verif.status == 200){
-                    console.log('--> Sukses Reff')
-                    console.log('==========================\n')
+                for (let attempt = 0; attempt < maxAttempts; attempt++) { 
+                    linkConfirm = await GetOtp(email.split("@")[0], email.split("@")[1]); 
+                    if (linkConfirm) break;
+                    
+                    console.log(`---> Wait for veriff link..`); 
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                } 
+                if (!linkConfirm) { 
+                    console.log('Failed to get the veriff link after 5 attempts'); 
+                } else { 
+                    const verif = await getVerif(linkConfirm); 
+                    if (verif.status == 200) { 
+                        console.log('--> Sukses Reff'); 
+                        console.log('==========================\n'); 
+                    } 
                 }
             }
         } catch (error) {
